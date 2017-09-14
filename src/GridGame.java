@@ -32,7 +32,7 @@ public class GridGame extends JPanel implements ActionListener, KeyListener{
 		frame.setVisible(true);
 		frame.pack();
 		frame.addKeyListener(this);
-		
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		activeBlock = new Block();
 		
 		t.start();
@@ -125,6 +125,9 @@ class Block{
 	private int floor = 475;
 	public boolean active = true;
 	
+	private boolean moveLeft = false;
+	private boolean moveRight = false;
+	
 	int speed = 1000;
 	long dropTime = -1;
 	
@@ -150,14 +153,15 @@ class Block{
 	}
 	
 	public void moveLeft(){
-		xPosition -= xMove;
+		moveLeft = true;
 	}
 	
 	public void moveRight(){
-		xPosition += xMove;
+		moveRight = true;
 	}
 	
 	public void moveDown(){
+		
 		yPosition += yMove;
 	}
 	
@@ -171,19 +175,36 @@ class Block{
 			active = false;
 		}
 		
-		for(Block b : blocks){
-			if(xPosition == b.xPosition && yPosition >= b.yPosition){
-				yPosition -= yMove;
-				active = false;
-			}
+		if(checkBlock(xPosition, yPosition, blocks)){
+			yPosition -= yMove;
+			active = false;
+		}
+
+		if(moveLeft && !checkBlock(xPosition - xMove, yPosition, blocks)){
+			xPosition -= xMove;
 		}
 		
+		if(moveRight && !checkBlock(xPosition + xMove, yPosition, blocks)){
+			xPosition += xMove;
+		}
+		moveLeft = false;
+		moveRight = false;
 		if(active){
 			if(System.currentTimeMillis() - dropTime >= speed){
 				yPosition += yMove;
 				dropTime = System.currentTimeMillis();
 			}
 		}
+	}
+	
+	private boolean checkBlock(int x, int y, ArrayList<Block> blocks){
+		for(Block b : blocks){
+			if(x == b.xPosition && y >= b.yPosition){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }
 
